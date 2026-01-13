@@ -338,9 +338,21 @@ const envInfo = {
   MongoDB: 'MONGODB_URL, MONGODB_DB'
 };
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Database viewer running on http://localhost:${PORT}`);
+/**
+ * Determine bind host/port.
+ * PreviewManager injects PORT/HOST env vars; we also accept CLI flags for robustness.
+ */
+function parseArg(name) {
+  const idx = process.argv.indexOf(name);
+  if (idx !== -1 && process.argv[idx + 1]) return process.argv[idx + 1];
+  return null;
+}
+
+const HOST = parseArg('--host') || process.env.HOST || '0.0.0.0';
+const PORT = Number(parseArg('--port') || process.env.PORT || 3000);
+
+app.listen(PORT, HOST, () => {
+  console.log(`Database viewer running on http://${HOST}:${PORT}`);
   console.log('\nEnvironment variables expected:');
   Object.entries(envInfo).forEach(([db, vars]) => {
     console.log(`${db}: ${vars}`);
